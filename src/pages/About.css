@@ -1,0 +1,504 @@
+
+.sa-about-page {
+  background: #f8f7f3;
+  color: #102238;
+}
+
+/* CINEMATIC HERO */
+.sa-about-hero {
+  min-height: 760px;
+  min-height: max(700px, calc(100svh - 80px));
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: #091727;
+  color: white;
+}
+
+.sa-about-hero-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2200&q=90');
+  background-size: cover;
+  background-position: center 55%;
+  transform: scale(1.025);
+  animation: saAboutHeroReveal 1.4s ease-out both;
+}
+
+.sa-about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 16, 29, .94) 0%, rgba(5, 16, 29, .78) 42%, rgba(5, 16, 29, .28) 100%),
+    linear-gradient(0deg, rgba(5, 16, 29, .65), transparent 36%);
+}
+
+.sa-about-hero-content {
+  position: relative;
+  z-index: 2;
+  width: min(1200px, 88%);
+  margin: 0 auto;
+  padding: 130px 0 150px;
+}
+
+.sa-about-kicker,
+.sa-about-overline {
+  font-size: 10px;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.sa-about-kicker {
+  display: block;
+  color: #d8bd83;
+  margin-bottom: 34px;
+}
+
+.sa-about-hero h1 {
+  max-width: 1050px;
+  margin: 0 0 28px;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(58px, 7.6vw, 104px);
+  line-height: 1.04;
+  font-weight: 500;
+  letter-spacing: -3px;
+}
+
+.sa-about-hero h1 em,
+.sa-about-beliefs h2 em,
+.sa-about-intro-content h2 em,
+.sa-about-closing h2 em {
+  color: #d8bd83;
+  font-weight: 500;
+}
+
+.sa-about-hero-content > p {
+  max-width: 570px;
+  color: rgba(255, 255, 255, .76);
+  font-size: 15px;
+  line-height: 2;
+}
+
+.sa-about-hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-top: 38px;
+}
+
+.sa-about-primary-action,
+.sa-about-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 30px;
+  text-decoration: none;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  transition: .3s ease;
+}
+
+.sa-about-primary-action {
+  padding: 19px 23px;
+  background: #c5a052;
+  color: #091727;
+}
+
+.sa-about-primary-action:hover {
+  background: #e0c78f;
+  transform: translateY(-2px);
+}
+
+.sa-about-secondary-action {
+  color: white;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(216, 189, 131, .65);
+}
+
+.sa-about-secondary-action:hover {
+  color: #d8bd83;
+}
+
+.sa-about-hero-side-note {
+  position: absolute;
+  z-index: 2;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: right;
+  color: rgba(255, 255, 255, .72);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.sa-about-hero-side-note span:first-child {
+  color: #d8bd83;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sa-about-hero-bottom {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 6%;
+  right: 6%;
+  min-height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid rgba(255, 255, 255, .22);
+  color: rgba(255, 255, 255, .65);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.sa-about-hero-bottom a {
+  color: #d8bd83;
+  text-decoration: none;
+  transition: .3s ease;
+}
+
+.sa-about-hero-bottom a:hover {
+  color: white;
+}
+
+.sa-about-hero-bottom a span {
+  margin-left: 12px;
+  font-size: 14px;
+}
+
+/* INTRODUCTION */
+.sa-about-introduction {
+  width: min(1200px, 88%);
+  margin: auto;
+  padding: 135px 0;
+  display: grid;
+  grid-template-columns: .65fr 2fr;
+  gap: 60px;
+}
+
+.sa-about-intro-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 12px;
+}
+
+.sa-about-intro-label span {
+  color: #b59656;
+  font-family: 'Playfair Display', serif;
+  font-size: 25px;
+}
+
+.sa-about-intro-label p {
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.sa-about-overline {
+  color: #a5864b;
+}
+
+.sa-about-intro-content h2,
+.sa-about-beliefs-heading h2,
+.sa-about-closing h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 4.5vw, 58px);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -1.5px;
+}
+
+.sa-about-intro-content h2 {
+  margin: 25px 0 35px;
+}
+
+.sa-about-intro-content h2 em,
+.sa-about-beliefs-heading h2 em {
+  color: #a98a50;
+}
+
+.sa-about-intro-copy {
+  max-width: 650px;
+  border-left: 1px solid #c7ad78;
+  padding-left: 28px;
+}
+
+.sa-about-intro-copy p {
+  color: #68717a;
+  font-size: 14px;
+  line-height: 2;
+  margin-bottom: 18px;
+}
+
+/* IMAGE STORY */
+.sa-about-image-story {
+  width: 88%;
+  max-width: 1400px;
+  height: 540px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: #102238;
+}
+
+.sa-about-image-story-photo {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=90');
+  background-size: cover;
+  background-position: center;
+  transition: transform .8s ease;
+}
+
+.sa-about-image-story:hover .sa-about-image-story-photo {
+  transform: scale(1.035);
+}
+
+.sa-about-image-story::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 0;
+  background: linear-gradient(transparent, rgba(5, 17, 30, .65));
+}
+
+.sa-about-image-story-caption {
+  position: absolute;
+  z-index: 1;
+  bottom: 28px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+/* BELIEFS */
+.sa-about-beliefs {
+  width: min(1200px, 88%);
+  margin: auto;
+  padding: 140px 0;
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 100px;
+}
+
+.sa-about-beliefs-heading h2 {
+  margin-top: 25px;
+}
+
+.sa-about-belief-list article {
+  display: grid;
+  grid-template-columns: 55px 1fr;
+  gap: 20px;
+  padding: 25px 0;
+  border-bottom: 1px solid #dedbd2;
+}
+
+.sa-about-belief-list article:first-child {
+  border-top: 1px solid #dedbd2;
+}
+
+.sa-about-belief-list article > span {
+  color: #b59656;
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+}
+
+.sa-about-belief-list h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 25px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.sa-about-belief-list p {
+  color: #6e7780;
+  font-size: 13px;
+  line-height: 1.9;
+  max-width: 440px;
+}
+
+/* CLOSING */
+.sa-about-closing {
+  padding: 110px 20px;
+  text-align: center;
+  color: white;
+  background: #0a1a2c;
+}
+
+.sa-about-closing > p {
+  color: #d8bd83;
+  font-size: 9px;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.sa-about-closing h2 {
+  margin: 25px 0 35px;
+}
+
+.sa-about-closing a {
+  display: inline-flex;
+  gap: 25px;
+  align-items: center;
+  padding: 17px 25px;
+  border: 1px solid rgba(216, 189, 131, .6);
+  color: white;
+  text-decoration: none;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  transition: .3s ease;
+}
+
+.sa-about-closing a:hover {
+  background: #c5a052;
+  color: #091727;
+}
+
+/* HERO ENTRANCE */
+@keyframes saAboutHeroReveal {
+  from {
+    opacity: .65;
+    transform: scale(1.07);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.025);
+  }
+}
+
+/* TABLET */
+@media (max-width: 950px) {
+  .sa-about-hero-side-note {
+    display: none;
+  }
+
+  .sa-about-introduction,
+  .sa-about-beliefs {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .sa-about-beliefs {
+    padding: 100px 0;
+  }
+
+  .sa-about-image-story {
+    height: 440px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .sa-about-hero {
+    min-height: 720px;
+    min-height: max(680px, calc(100svh - 70px));
+  }
+
+  .sa-about-hero-content {
+    width: 88%;
+    padding: 95px 0 130px;
+  }
+
+  .sa-about-kicker {
+    max-width: 290px;
+    font-size: 8px;
+    line-height: 1.9;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+  }
+
+  .sa-about-hero h1 {
+    font-size: clamp(46px, 12vw, 61px);
+    line-height: 1.08;
+    letter-spacing: -1.8px;
+  }
+
+  .sa-about-hero-content > p {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .sa-about-hero-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 28px;
+  }
+
+  .sa-about-primary-action {
+    padding: 17px 19px;
+  }
+
+  .sa-about-hero-bottom {
+    left: 6%;
+    right: 6%;
+    min-height: 65px;
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+
+  .sa-about-hero-bottom > span:last-child {
+    display: none;
+  }
+
+  .sa-about-introduction {
+    padding: 85px 0;
+    gap: 28px;
+  }
+
+  .sa-about-intro-content h2,
+  .sa-about-beliefs-heading h2 {
+    font-size: 38px;
+  }
+
+  .sa-about-intro-copy {
+    padding-left: 18px;
+  }
+
+  .sa-about-intro-copy p {
+    font-size: 13px;
+  }
+
+  .sa-about-image-story {
+    width: 88%;
+    height: 310px;
+  }
+
+  .sa-about-image-story-caption {
+    left: 18px;
+    right: 18px;
+    bottom: 20px;
+    font-size: 7px;
+    letter-spacing: 1.2px;
+  }
+
+  .sa-about-beliefs {
+    padding: 85px 0;
+  }
+
+  .sa-about-belief-list article {
+    grid-template-columns: 38px 1fr;
+    gap: 12px;
+  }
+
+  .sa-about-closing {
+    padding: 85px 20px;
+  }
+
+  .sa-about-closing h2 {
+    font-size: 38px;
+  }
+}

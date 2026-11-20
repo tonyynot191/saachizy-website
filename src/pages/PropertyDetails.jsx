@@ -12,31 +12,110 @@ function PropertyDetails() {
   const { id } = useParams();
   const properties = useProperties();
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const property = properties.find(
     item => String(item.id) === String(id)
   );
 
-  const images = useMemo(() => {
-    if (!property) return [fallbackImage];
+  // Collect all uploaded images and videos from Supabase.
+  const mediaItems = useMemo(() => {
+    if (!property) return [];
 
-    const gallery = Array.isArray(property.images)
-      ? property.images.filter(Boolean)
+    const uploadedMedia = Array.isArray(property.media)
+      ? property.media
+          .filter(item => item && item.url)
+          .map(item => ({
+            url: item.url,
+            type:
+              item.type ||
+              (item.url.match(/\.(mp4|webm|mov)(\?|$)/i)
+                ? 'video'
+                : 'image'),
+            name: item.name || '',
+          }))
       : [];
 
-    const allImages = [
-      property.image,
-      ...gallery,
-    ].filter(Boolean);
+    // Support older image arrays if they exist.
+    const oldImages = Array.isArray(property.images)
+      ? property.images
+          .filter(Boolean)
+          .map(item => ({
+            url: typeof item === 'string' ? item : item.url,
+            type: 'image',
+            name: '',
+          }))
+      : [];
 
-    return [...new Set(allImages.length ? allImages : [fallbackImage])];
+    // Include the main cover image.
+    const coverImage = property.image
+      ? [
+          {
+            url: property.image,
+            type: 'image',
+            name: 'Cover image',
+          },
+        ]
+      : [];
+
+    const combined = [
+      ...coverImage,
+      ...uploadedMedia,
+      ...oldImages,
+    ];
+
+    // Remove duplicate URLs.
+    const unique = combined.filter(
+      (item, index, array) =>
+        item.url &&
+        array.findIndex(other => other.url === item.url) === index
+    );
+
+    return unique.length
+      ? unique
+      : [
+          {
+            url: fallbackImage,
+            type: 'image',
+            name: 'Property image',
+          },
+        ];
   }, [property]);
 
   useEffect(() => {
     setActiveImage(0);
+    setGalleryOpen(false);
   }, [id]);
+
+  // Close the full-screen gallery using Escape.
+  useEffect(() => {
+    if (!galleryOpen) return;
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setGalleryOpen(false);
+      }
+
+      if (event.key === 'ArrowRight') {
+        setActiveImage(previous =>
+          (previous + 1) % mediaItems.length
+        );
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setActiveImage(previous =>
+          (previous - 1 + mediaItems.length) % mediaItems.length
+        );
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [galleryOpen, mediaItems.length]);
 
   if (!property) {
     return (
@@ -51,6 +130,7 @@ function PropertyDetails() {
             We couldn't find the property you requested.
             Explore our collection to discover other available opportunities.
           </p>
+
           <Link to="/properties" className="sa-detail-primary-button">
             Explore Properties <span>↗</span>
           </Link>
@@ -62,6 +142,7 @@ function PropertyDetails() {
   }
 
   const isAvailable = property.status === 'Available';
+  const activeMedia = mediaItems[activeImage] || mediaItems[0];
 
   const whatsappMessage = encodeURIComponent(
     `Hello Saachizy, I am interested in this property:\n\n${property.title}\nLocation: ${property.location}\nPrice: ${property.price}\n\nPlease provide more information and inspection details.`
@@ -75,10 +156,21 @@ function PropertyDetails() {
     { label: 'LEGAL TITLE', value: property.titleDocument },
   ].filter(item => item.value);
 
+  function showPrevious() {
+    setActiveImage(previous =>
+      (previous - 1 + mediaItems.length) % mediaItems.length
+    );
+  }
+
+  function showNext() {
+    setActiveImage(previous =>
+      (previous + 1) % mediaItems.length
+    );
+  }
+
   return (
     <div className="sa-detail-page">
 
-      {/* SAACHIZY SIGNATURE NAVIGATION */}
       <SignatureNavigation />
 
       <main className="sa-detail-main">
@@ -112,54 +204,149 @@ function PropertyDetails() {
               <i />
               {property.status || 'Status unavailable'}
             </span>
+
             <small>PROPERTY STATUS</small>
           </div>
         </header>
 
-        {/* PROPERTY IMAGE GALLERY */}
+        {/* PROPERTY IMAGE AND VIDEO GALLERY */}
         <section className="sa-detail-gallery">
 
           <div className="sa-gallery-main">
-            <img
-              src={images[activeImage] || fallbackImage}
-              alt={property.title}
-              onError={event => {
-                event.currentTarget.onerror = null;
-                event.currentTarget.src = fallbackImage;
-              }}
-            />
+
+            {activeMedia?.type === 'video' ? (
+              <video
+                key={activeMedia.url}
+                src={activeMedia.url}
+                controls
+                playsInline
+                preload="metadata"
+                className="sa-gallery-main-video"
+              />
+            ) : (
+              <button
+                type="button"
+                className="sa-gallery-image-button"
+                onClick={() => setGalleryOpen(true)}
+                aria-label="Open full-screen property gallery"
+              >
+                <img
+                  src={activeMedia?.url || fallbackImage}
+                  alt={property.title}
+                  onError={event => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = fallbackImage;
+                  }}
+                />
+
+                <span className="sa-gallery-expand">
+                  VIEW FULL GALLERY ↗
+                </span>
+              </button>
+            )}
 
             <span className="sa-gallery-label">
               PROPERTY GALLERY
             </span>
 
-            {images.length > 1 && (
-              <span className="sa-gallery-counter">
-                {String(activeImage + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
-              </span>
-            )}
+            <span className="sa-gallery-counter">
+              {String(activeImage + 1).padStart(2, '0')} / {String(mediaItems.length).padStart(2, '0')}
+            </span>
+
           </div>
 
-          {images.length > 1 && (
+          {/* MEDIA THUMBNAILS */}
+          {mediaItems.length > 1 && (
             <div className="sa-gallery-thumbnails">
-              {images.map((image, index) => (
+
+              {mediaItems.map((item, index) => (
                 <button
                   type="button"
-                  key={`${image}-${index}`}
+                  key={`${item.url}-${index}`}
                   className={activeImage === index ? 'active' : ''}
                   onClick={() => setActiveImage(index)}
-                  aria-label={`View property image ${index + 1}`}
+                  aria-label={`View property media ${index + 1}`}
                 >
-                  <img
-                    src={image}
-                    alt={`${property.title} view ${index + 1}`}
-                    onError={event => {
-                      event.currentTarget.onerror = null;
-                      event.currentTarget.src = fallbackImage;
-                    }}
-                  />
+                  {item.type === 'video' ? (
+                    <div className="sa-gallery-video-thumbnail">
+                      <video
+                        src={item.url}
+                        muted
+                        preload="metadata"
+                      />
+
+                      <span>▶ VIDEO</span>
+                    </div>
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={`${property.title} view ${index + 1}`}
+                      onError={event => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = fallbackImage;
+                      }}
+                    />
+                  )}
                 </button>
               ))}
+
+            </div>
+          )}
+
+          {/* FULL-SCREEN GALLERY */}
+          {galleryOpen && activeMedia?.type !== 'video' && (
+            <div
+              className="sa-gallery-lightbox"
+              onClick={() => setGalleryOpen(false)}
+            >
+
+              <button
+                type="button"
+                className="sa-gallery-close"
+                onClick={() => setGalleryOpen(false)}
+                aria-label="Close gallery"
+              >
+                ×
+              </button>
+
+              {mediaItems.length > 1 && (
+                <button
+                  type="button"
+                  className="sa-gallery-prev"
+                  onClick={event => {
+                    event.stopPropagation();
+                    showPrevious();
+                  }}
+                  aria-label="Previous image"
+                >
+                  ‹
+                </button>
+              )}
+
+              <img
+                src={activeMedia.url}
+                alt={property.title}
+                onClick={event => event.stopPropagation()}
+              />
+
+              {mediaItems.length > 1 && (
+                <button
+                  type="button"
+                  className="sa-gallery-next"
+                  onClick={event => {
+                    event.stopPropagation();
+                    showNext();
+                  }}
+                  aria-label="Next image"
+                >
+                  ›
+                </button>
+              )}
+
+              <span className="sa-gallery-lightbox-counter">
+                {activeImage + 1} / {mediaItems.length}
+              </span>
+
             </div>
           )}
 
@@ -207,7 +394,9 @@ function PropertyDetails() {
 
               <div className="sa-information-row">
                 <span>Location</span>
-                <strong>{property.location || 'Available on request'}</strong>
+                <strong>
+                  {property.location || 'Available on request'}
+                </strong>
               </div>
 
               <div className="sa-information-row">
@@ -217,7 +406,9 @@ function PropertyDetails() {
 
               <div className="sa-information-row">
                 <span>Title documentation</span>
-                <strong>{property.titleDocument || 'Contact for details'}</strong>
+                <strong>
+                  {property.titleDocument || 'Contact for details'}
+                </strong>
               </div>
             </div>
 
@@ -236,9 +427,12 @@ function PropertyDetails() {
 
               <div className="sa-enquiry-location">
                 <span>⌖</span>
+
                 <div>
                   <small>PROPERTY LOCATION</small>
-                  <strong>{property.location || 'Available on request'}</strong>
+                  <strong>
+                    {property.location || 'Available on request'}
+                  </strong>
                 </div>
               </div>
 
@@ -266,6 +460,7 @@ function PropertyDetails() {
                 <div className="sa-unavailable-message">
                   This property is currently not available for new enquiries.
                   Contact our team for similar opportunities.
+
                   <a
                     href="https://wa.me/2347073874044"
                     target="_blank"
@@ -286,6 +481,7 @@ function PropertyDetails() {
             <div className="sa-detail-assistance">
               <span>NEED ASSISTANCE?</span>
               <h3>Let's help you make the right move.</h3>
+
               <a
                 href="https://wa.me/2347073874044"
                 target="_blank"
@@ -313,7 +509,6 @@ function PropertyDetails() {
 
       </main>
 
-      {/* SAACHIZY SIGNATURE FOOTER */}
       <SignatureFooter />
 
     </div>
@@ -368,6 +563,7 @@ function SignatureNavigation() {
 
         <div className="mobile-menu-footer">
           <span>THE STORY. THE VISION. THE FUTURE.</span>
+
           <a
             href="https://wa.me/2347073874044"
             target="_blank"
@@ -391,6 +587,7 @@ function SignatureNavigation() {
         aria-expanded={menuOpen}
       >
         <span>{menuOpen ? 'CLOSE' : 'MENU'}</span>
+
         <span className="sa-menu-icon">
           <i></i>
           <i></i>
@@ -464,8 +661,12 @@ function SignatureFooter() {
       </div>
 
       <div className="sa-footer-bottom">
-        <span>© {new Date().getFullYear()} SAACHIZY. ALL RIGHTS RESERVED.</span>
+        <span>
+          © {new Date().getFullYear()} SAACHIZY. ALL RIGHTS RESERVED.
+        </span>
+
         <span>THE STORY. THE VISION. THE FUTURE.</span>
+
         <Link to="/">BACK TO TOP ↑</Link>
       </div>
 

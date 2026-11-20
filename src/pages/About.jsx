@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import '../App.css';
 import './About.css';
 
@@ -9,6 +10,11 @@ function About() {
 
   return (
     <div className="website sa-about-page">
+
+      <SEO
+        title="About Saachizy | Our Story, Vision & Real Estate Values"
+        description="Discover the story behind Saachizy, an Abuja real estate brand connecting people with residential, commercial and land investment opportunities through vision, integrity and lasting value."
+      />
 
       {/* SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>

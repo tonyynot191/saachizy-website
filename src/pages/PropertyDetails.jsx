@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import SEO from '../components/SEO';
 import { useProperties } from '../data/propertyStore';
 import '../App.css';
 import './PropertyDetails.css';
@@ -170,6 +171,19 @@ function PropertyDetails() {
 
   return (
     <div className="sa-detail-page">
+
+      <SEO
+        title={`${property.title} in ${property.location || 'Abuja, Nigeria'}`}
+        description={
+          property.description ||
+          `Explore ${property.title} in ${property.location || 'Abuja, Nigeria'} with Saachizy. Contact our team for property details, pricing and inspection arrangements.`
+        }
+        image={
+          mediaItems.find(item => item.type === 'image')?.url ||
+          fallbackImage
+        }
+        type="article"
+      />
 
       <SignatureNavigation />
 

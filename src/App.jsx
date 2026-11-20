@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from './components/SEO';
 import './App.css';
 
 function App() {
@@ -71,6 +72,10 @@ function App() {
 
   return (
     <div className="website">
+      <SEO
+        title="Luxury Real Estate, Land & Property Investment in Abuja"
+        description="Discover exceptional real estate opportunities with Saachizy. Explore luxury homes, prime land, residential and commercial properties, and property investment opportunities in Abuja, Nigeria."
+      />
 
       {/* SAACHIZY SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>

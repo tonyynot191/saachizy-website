@@ -1,6 +1,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import { useProperties } from '../data/propertyStore';
 import '../App.css';
 import './Properties.css';
@@ -47,6 +48,11 @@ function Properties() {
 
   return (
     <div className="sa-properties-page">
+
+      <SEO
+        title="Properties for Sale in Abuja | Luxury Homes, Land & Investment"
+        description="Explore premium properties for sale in Abuja with Saachizy. Discover luxury homes, residential and commercial properties, and strategic land investment opportunities across Abuja, Nigeria."
+      />
 
       {/* HOMEPAGE SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>

@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import '../App.css';
 import './Expertise.css';
 
@@ -63,6 +64,11 @@ function Expertise() {
 
   return (
     <div className="website sa-expertise-page">
+
+      <SEO
+        title="Real Estate Services in Abuja | Property Advisory, Land & Development"
+        description="Explore Saachizy's real estate services in Abuja, including property marketing and advisory, residential and commercial land opportunities, property acquisition guidance and real estate development."
+      />
 
       {/* SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>

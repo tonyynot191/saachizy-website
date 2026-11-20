@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import SEO from '../components/SEO';
 import '../App.css';
 import './Contact.css';
 
@@ -90,6 +91,11 @@ function Contact() {
 
   return (
     <div className="website sa-contact-page">
+
+      <SEO
+        title="Contact Saachizy | Real Estate Enquiries in Abuja"
+        description="Contact Saachizy in Abuja, Nigeria, for residential and commercial properties, land investment opportunities, property marketing and real estate development enquiries. Call or WhatsApp our team."
+      />
 
       {/* SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>

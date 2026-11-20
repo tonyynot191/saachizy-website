@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import BrandLogo from './components/BrandLogo';
 import SEO from './components/SEO';
 import './App.css';
 
@@ -80,13 +81,10 @@ function App() {
       {/* SAACHIZY SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>
 
-        <a
-          href="#home"
-          className="logo"
-          onClick={() => setMenuOpen(false)}
-        >
-          SAACHIZY<span>.</span>
-        </a>
+        <BrandLogo
+  className="logo"
+  onClick={() => setMenuOpen(false)}
+/>
 
         <div className="nav-links">
         
@@ -119,7 +117,7 @@ function App() {
           <div className="mobile-menu-footer">
             <span>THE STORY. THE VISION. THE FUTURE.</span>
             <a
-              href="https://wa.me/2347073874044"
+              href="https://wa.me/2349060446377"
               target="_blank"
               rel="noreferrer"
             >
@@ -478,7 +476,7 @@ function App() {
             </div>
 
             <a
-              href="https://wa.me/2347073874044?text=Hello%20Saachizy%2C%20I%20am%20interested%20in%20the%20Guzape%20Main%20terrace%20duplexes."
+              href="https://wa.me/2349060446377?text=Hello%20Saachizy%2C%20I%20am%20interested%20in%20the%20Guzape%20Main%20terrace%20duplexes."
               className="sa-featured-button"
               target="_blank"
               rel="noreferrer"
@@ -761,7 +759,7 @@ function App() {
           <div className="sa-enquiry-alternative">
             <span>Prefer a direct conversation?</span>
             <a
-              href="https://wa.me/2347073874044"
+              href="https://wa.me/2349060446377"
               target="_blank"
               rel="noreferrer"
             >
@@ -778,9 +776,10 @@ function App() {
         <div className="sa-footer-main">
 
           <div className="sa-footer-brand">
-            <a href="#home" className="sa-footer-logo">
-              SAACHIZY<span>.</span>
-            </a>
+            <BrandLogo
+  className="sa-footer-logo"
+  variant="footer"
+/>
 
             <p className="sa-footer-tagline">
               THE STORY. THE VISION.<br />

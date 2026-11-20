@@ -1,11 +1,17 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useProperties } from '../data/propertyStore';
+import { usePropertiesWithStatus } from '../data/propertyStore';
+import BrandLogo from '../components/BrandLogo';
+import Loader from '../components/Loader';
 import './Admin.css';
 
 function Admin() {
-  const properties = useProperties();
+  const {
+  properties,
+  loading,
+  error,
+} = usePropertiesWithStatus();
 
   const [enquiries, setEnquiries] = useState(() => {
     try {
@@ -65,18 +71,66 @@ function Admin() {
     year: 'numeric',
   }).format(new Date());
 
+    if (loading) {
+    return (
+      <Loader
+        fullScreen
+        message="Preparing your Saachizy dashboard..."
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '30px',
+          textAlign: 'center',
+          background: '#071321',
+          color: '#ffffff',
+        }}
+      >
+        <BrandLogo variant="header" />
+
+        <h2 style={{ marginTop: '35px' }}>
+          Dashboard unavailable
+        </h2>
+
+        <p style={{ color: '#c9c9c9', marginBottom: '25px' }}>
+          {error}
+        </p>
+
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            padding: '13px 25px',
+            background: '#c69b57',
+            color: '#071321',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: '600',
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="sa-dashboard">
 
       {/* SIDEBAR */}
       <aside className="sa-sidebar">
-        <Link to="/" className="sa-brand">
-          <span className="sa-brand-mark">S</span>
-          <span>
-            SAACHIZY
-            <small>THE STORY. THE VISION. THE FUTURE.</small>
-          </span>
-        </Link>
+        <BrandLogo
+  className="sa-brand"
+  variant="header"
+/>
 
         <div className="sa-sidebar-label">WORKSPACE</div>
 

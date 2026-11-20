@@ -149,8 +149,9 @@ export async function uploadPropertyMedia(propertyId, file) {
   return mediaItem;
 }
 
-// Listen for database property changes
-export function useProperties() {
+
+// Load properties and expose their loading status
+function usePropertiesData() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -168,11 +169,13 @@ export function useProperties() {
         }
       } catch (err) {
         if (active) {
-          setError(err.message);
+          setError(err.message || 'Unable to load properties.');
           console.error('Property loading failed:', err);
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
@@ -183,5 +186,15 @@ export function useProperties() {
     };
   }, []);
 
-  return properties;
+  return { properties, loading, error };
+}
+
+// Existing hook — keeps other pages working
+export function useProperties() {
+  return usePropertiesData().properties;
+}
+
+// New hook — provides properties, loading and error
+export function usePropertiesWithStatus() {
+  return usePropertiesData();
 }

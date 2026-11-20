@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEO from '../components/SEO';
+import BrandLogo from '../components/BrandLogo';
 import '../App.css';
 import './Contact.css';
 
@@ -99,9 +100,10 @@ function Contact() {
 
       {/* SIGNATURE NAVIGATION */}
       <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>
-        <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
-          SAACHIZY<span>.</span>
-        </Link>
+        <BrandLogo
+  className="logo"
+  onClick={() => setMenuOpen(false)}
+/>
 
         <div className="nav-links">
           <Link to="/" onClick={() => setMenuOpen(false)}>
@@ -122,7 +124,7 @@ function Contact() {
 
           <div className="mobile-menu-footer">
             <span>THE STORY. THE VISION. THE FUTURE.</span>
-            <a href="https://wa.me/2347073874044" target="_blank" rel="noreferrer">
+            <a href="https://wa.me/2349060446377" target="_blank" rel="noreferrer">
               START A CONVERSATION ↗
             </a>
           </div>
@@ -171,7 +173,7 @@ function Contact() {
             </a>
 
             <a
-              href="https://wa.me/2347073874044"
+              href="https://wa.me/2349060446377"
               target="_blank"
               rel="noreferrer"
               className="sa-contact-secondary-action"
@@ -226,7 +228,7 @@ function Contact() {
             </a>
 
             <a
-              href="https://wa.me/2347073874044"
+              href="https://wa.me/2349060446377"
               target="_blank"
               rel="noreferrer"
               className="sa-contact-method"
@@ -400,7 +402,7 @@ function Contact() {
           <em>the right connection.</em>
         </h2>
         <a
-          href="https://wa.me/2347073874044"
+          href="https://wa.me/2349060446377"
           target="_blank"
           rel="noreferrer"
         >
@@ -413,9 +415,10 @@ function Contact() {
         <div className="sa-footer-main">
 
           <div className="sa-footer-brand">
-            <Link to="/" className="sa-footer-logo">
-              SAACHIZY<span>.</span>
-            </Link>
+            <BrandLogo
+  className="sa-footer-logo"
+  variant="footer"
+/>
             <p className="sa-footer-tagline">
               THE STORY. THE VISION.
               <br />
@@ -449,7 +452,7 @@ function Contact() {
               <em>next opportunity.</em>
             </h3>
             <a
-              href="https://wa.me/2347073874044"
+              href="https://wa.me/2349060446377"
               target="_blank"
               rel="noreferrer"
               className="sa-footer-contact-link"

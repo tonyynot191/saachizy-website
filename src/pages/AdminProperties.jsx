@@ -1,6 +1,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import BrandLogo from '../components/BrandLogo';
 
 import {
   useProperties,
@@ -226,14 +227,10 @@ function AdminProperties() {
       {/* SIDEBAR */}
       <aside className="sa-sidebar">
 
-        <Link to="/" className="sa-brand">
-          <span className="sa-brand-mark">S</span>
-
-          <span>
-            SAACHIZY
-            <small>THE STORY. THE VISION. THE FUTURE.</small>
-          </span>
-        </Link>
+       <BrandLogo
+  className="sa-brand"
+  variant="header"
+/>
 
         <div className="sa-sidebar-label">WORKSPACE</div>
 

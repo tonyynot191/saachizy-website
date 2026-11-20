@@ -32,3 +32,30 @@ input,
 textarea {
   font: inherit;
 }
+/* OFFICIAL SAACHIZY BRAND LOGO */
+
+.sa-brand-logo-image {
+  display: block;
+  width: 175px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.sa-brand-logo-header {
+  width: 175px;
+}
+
+.sa-brand-logo-footer {
+  width: 210px;
+}
+
+@media (max-width: 768px) {
+  .sa-brand-logo-header {
+    width: 145px;
+  }
+
+  .sa-brand-logo-footer {
+    width: 185px;
+  }
+}

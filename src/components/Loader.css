@@ -1,0 +1,184 @@
+
+/* =========================================
+   SAACHIZY SIGNATURE LOADING EXPERIENCE
+========================================= */
+
+.sa-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(197, 157, 91, 0.10),
+      transparent 42%
+    ),
+    #071321;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.sa-loader-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.sa-loader-inline {
+  min-height: 320px;
+  padding: 55px 20px;
+  border-radius: 12px;
+}
+
+.sa-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(90%, 420px);
+  text-align: center;
+  animation: sa-loader-appear 1s ease both;
+}
+
+/* BRAND LOGO */
+
+.sa-loader-brand {
+  display: block;
+  margin-bottom: 38px;
+  animation: sa-loader-float 3.5s ease-in-out infinite;
+}
+
+.sa-loader-brand .sa-brand-logo-image {
+  width: 205px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ANIMATED GOLD LINE */
+
+.sa-loader-animation {
+  position: relative;
+  width: 190px;
+  height: 3px;
+  margin-bottom: 25px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sa-loader-animation span {
+  position: absolute;
+  top: 0;
+  left: -45%;
+  width: 45%;
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #a77a36,
+    #f8e0a8,
+    #c69b57,
+    transparent
+  );
+  animation: sa-loader-progress 1.7s ease-in-out infinite;
+}
+
+/* LOADING TEXT */
+
+.sa-loader-message {
+  margin: 0 0 13px;
+  color: #f4f0e8;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  animation: sa-loader-text 2s ease-in-out infinite;
+}
+
+.sa-loader-caption {
+  color: #b99a66;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 3px;
+}
+
+/* ANIMATIONS */
+
+@keyframes sa-loader-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sa-loader-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes sa-loader-progress {
+  0% {
+    left: -45%;
+  }
+
+  100% {
+    left: 110%;
+  }
+}
+
+@keyframes sa-loader-text {
+  0%, 100% {
+    opacity: 0.65;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .sa-loader-brand .sa-brand-logo-image {
+    width: 175px;
+  }
+
+  .sa-loader-animation {
+    width: 155px;
+  }
+
+  .sa-loader-caption {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-loader-content,
+  .sa-loader-brand,
+  .sa-loader-animation span,
+  .sa-loader-message {
+    animation: none;
+  }
+
+  .sa-loader-animation span {
+    left: 20%;
+    width: 60%;
+  }
+}

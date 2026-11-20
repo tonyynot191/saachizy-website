@@ -1,8 +1,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import BrandLogo from '../components/BrandLogo';
 import SEO from '../components/SEO';
-import { useProperties } from '../data/propertyStore';
+import { usePropertiesWithStatus } from '../data/propertyStore';
+import Loader from '../components/Loader';
 import '../App.css';
 import './PropertyDetails.css';
 
@@ -11,7 +13,12 @@ const fallbackImage =
 
 function PropertyDetails() {
   const { id } = useParams();
-  const properties = useProperties();
+
+  const {
+    properties,
+    loading,
+    error,
+  } = usePropertiesWithStatus();
 
   const [activeImage, setActiveImage] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -118,6 +125,52 @@ function PropertyDetails() {
     };
   }, [galleryOpen, mediaItems.length]);
 
+  // Show the signature loader while Supabase retrieves properties.
+  if (loading) {
+    return (
+      <Loader
+        fullScreen
+        message="Preparing your property experience..."
+      />
+    );
+  }
+
+  // Handle database loading errors.
+  if (error) {
+    return (
+      <div className="sa-detail-page">
+        <SignatureNavigation />
+
+        <main className="sa-not-found">
+          <p className="sa-detail-eyebrow">PROPERTY COLLECTION</p>
+          <h1>Unable to Load Property.</h1>
+
+          <p>
+            We could not retrieve the property information.
+            Please try again.
+          </p>
+
+          <p>{error}</p>
+
+          <button
+            type="button"
+            className="sa-detail-primary-button"
+            onClick={() => window.location.reload()}
+          >
+            Try Again <span>↗</span>
+          </button>
+
+          <Link to="/properties" className="sa-detail-primary-button">
+            Explore Properties <span>↗</span>
+          </Link>
+        </main>
+
+        <SignatureFooter />
+      </div>
+    );
+  }
+
+  // Show the 404 page only after loading has finished.
   if (!property) {
     return (
       <div className="sa-detail-page">
@@ -127,6 +180,7 @@ function PropertyDetails() {
           <span>404</span>
           <p className="sa-detail-eyebrow">PROPERTY NOT FOUND</p>
           <h1>This opportunity is no longer here.</h1>
+
           <p>
             We couldn't find the property you requested.
             Explore our collection to discover other available opportunities.
@@ -453,7 +507,7 @@ function PropertyDetails() {
               {isAvailable ? (
                 <>
                   <a
-                    href={`https://wa.me/2347073874044?text=${whatsappMessage}`}
+                    href={`https://wa.me/2349060446377?text=${whatsappMessage}`}
                     target="_blank"
                     rel="noreferrer"
                     className="sa-enquiry-button"
@@ -462,7 +516,7 @@ function PropertyDetails() {
                   </a>
 
                   <a
-                    href="https://wa.me/2347073874044"
+                    href="https://wa.me/2349060446377"
                     target="_blank"
                     rel="noreferrer"
                     className="sa-enquiry-secondary"
@@ -476,7 +530,7 @@ function PropertyDetails() {
                   Contact our team for similar opportunities.
 
                   <a
-                    href="https://wa.me/2347073874044"
+                    href="https://wa.me/2349060446377"
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -497,7 +551,7 @@ function PropertyDetails() {
               <h3>Let's help you make the right move.</h3>
 
               <a
-                href="https://wa.me/2347073874044"
+                href="https://wa.me/2349060446377"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -540,13 +594,10 @@ function SignatureNavigation() {
   return (
     <nav className={`navbar ${menuOpen ? 'menu-open' : ''}`}>
 
-      <Link
-        to="/"
+      <BrandLogo
         className="logo"
         onClick={() => setMenuOpen(false)}
-      >
-        SAACHIZY<span>.</span>
-      </Link>
+      />
 
       <div className="nav-links">
 
@@ -579,7 +630,7 @@ function SignatureNavigation() {
           <span>THE STORY. THE VISION. THE FUTURE.</span>
 
           <a
-            href="https://wa.me/2347073874044"
+            href="https://wa.me/2349060446377"
             target="_blank"
             rel="noreferrer"
           >
@@ -624,9 +675,11 @@ function SignatureFooter() {
       <div className="sa-footer-main">
 
         <div className="sa-footer-brand">
-          <Link to="/" className="sa-footer-logo">
-            SAACHIZY<span>.</span>
-          </Link>
+
+          <BrandLogo
+            className="sa-footer-logo"
+            variant="footer"
+          />
 
           <p className="sa-footer-tagline">
             THE STORY. THE VISION.<br />
@@ -638,6 +691,7 @@ function SignatureFooter() {
             opportunities through vision, insight and
             lasting value.
           </p>
+
         </div>
 
         <div className="sa-footer-column">
@@ -657,10 +711,14 @@ function SignatureFooter() {
 
         <div className="sa-footer-column sa-footer-contact">
           <span>START A CONVERSATION</span>
-          <h3>Let's find your<br /><em>next opportunity.</em></h3>
+
+          <h3>
+            Let's find your<br />
+            <em>next opportunity.</em>
+          </h3>
 
           <a
-            href="https://wa.me/2347073874044"
+            href="https://wa.me/2349060446377"
             target="_blank"
             rel="noreferrer"
             className="sa-footer-contact-link"

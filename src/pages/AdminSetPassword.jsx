@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import BrandLogo from '../components/BrandLogo';
 import './AdminLogin.css';
 
 function AdminSetPassword() {
@@ -54,9 +55,10 @@ function AdminSetPassword() {
   return (
     <main className="admin-login-page">
       <div className="admin-login-card">
-        <a href="/" className="admin-login-logo">
-          SAACHIZY<span>.</span>
-        </a>
+        <BrandLogo
+  className="admin-login-logo"
+  variant="header"
+/>
 
         <div className="admin-login-heading">
           <p className="admin-login-eyebrow">ADMINISTRATION</p>

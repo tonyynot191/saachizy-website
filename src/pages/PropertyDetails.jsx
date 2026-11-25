@@ -11,6 +11,20 @@ import './PropertyDetails.css';
 const fallbackImage =
   'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85';
 
+// Check whether a property field contains meaningful information.
+function hasValue(value) {
+  if (value === null || value === undefined) return false;
+
+  const cleanedValue = String(value).trim().toLowerCase();
+
+  return (
+    cleanedValue !== '' &&
+    !['nil', 'null', 'undefined', 'n/a', 'na', 'none'].includes(
+      cleanedValue
+    )
+  );
+}
+
 function PropertyDetails() {
   const { id } = useParams();
 
@@ -26,6 +40,8 @@ function PropertyDetails() {
   const property = properties.find(
     item => String(item.id) === String(id)
   );
+
+  const isLand = property?.category === 'Land';
 
   // Collect all uploaded images and videos from Supabase.
   const mediaItems = useMemo(() => {
@@ -203,13 +219,49 @@ function PropertyDetails() {
     `Hello Saachizy, I am interested in this property:\n\n${property.title}\nLocation: ${property.location}\nPrice: ${property.price}\n\nPlease provide more information and inspection details.`
   );
 
-  const specifications = [
-    { label: 'PROPERTY TYPE', value: property.category },
-    { label: 'UNITS', value: property.units },
-    { label: 'BEDROOMS', value: property.bedrooms },
-    { label: 'LAND AREA', value: property.landSize },
-    { label: 'LEGAL TITLE', value: property.titleDocument },
-  ].filter(item => item.value);
+  // Build the property specifications according to its listing type.
+  const specifications = isLand
+    ? [
+        {
+          label: 'LAND USE',
+          value: property.propertyUse,
+        },
+        {
+          label: 'PLOT SIZE',
+          value: property.landSize,
+        },
+        {
+          label: 'LEGAL TITLE',
+          value: property.titleDocument,
+        },
+      ]
+    : [
+        {
+          label: 'PROPERTY TYPE',
+          value: property.category,
+        },
+        {
+          label: 'UNITS',
+          value: property.units,
+        },
+        {
+          label: 'BEDROOMS',
+          value: property.bedrooms,
+        },
+        {
+          label: 'LAND AREA',
+          value: property.landSize,
+        },
+        {
+          label: 'LEGAL TITLE',
+          value: property.titleDocument,
+        },
+      ];
+
+  // Remove empty values and placeholders such as nil or N/A.
+  const visibleSpecifications = specifications.filter(item =>
+    hasValue(item.value)
+  );
 
   function showPrevious() {
     setActiveImage(previous =>
@@ -431,7 +483,7 @@ function PropertyDetails() {
             </div>
 
             <div className="sa-detail-description">
-              {property.description ? (
+              {hasValue(property.description) ? (
                 <p>{property.description}</p>
               ) : (
                 <p>
@@ -441,43 +493,59 @@ function PropertyDetails() {
               )}
             </div>
 
-            <div className="sa-detail-spec-grid">
-              {specifications.map(item => (
-                <div className="sa-detail-spec" key={item.label}>
-                  <span>{item.label}</span>
-                  <strong>{item.value}</strong>
-                </div>
-              ))}
-            </div>
+            {/* ONLY DISPLAY AVAILABLE PROPERTY SPECIFICATIONS */}
+            {visibleSpecifications.length > 0 && (
+              <div className="sa-detail-spec-grid">
+                {visibleSpecifications.map(item => (
+                  <div className="sa-detail-spec" key={item.label}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* PROPERTY INFORMATION */}
             <div className="sa-detail-information">
               <p className="sa-detail-eyebrow">PROPERTY INFORMATION</p>
               <h3>Details that matter.</h3>
 
-              <div className="sa-information-row">
-                <span>Property</span>
-                <strong>{property.title}</strong>
-              </div>
+              {hasValue(property.title) && (
+                <div className="sa-information-row">
+                  <span>Property</span>
+                  <strong>{property.title}</strong>
+                </div>
+              )}
 
-              <div className="sa-information-row">
-                <span>Location</span>
-                <strong>
-                  {property.location || 'Available on request'}
-                </strong>
-              </div>
+              {hasValue(property.location) && (
+                <div className="sa-information-row">
+                  <span>Location</span>
+                  <strong>{property.location}</strong>
+                </div>
+              )}
 
-              <div className="sa-information-row">
-                <span>Category</span>
-                <strong>{property.category || 'Not specified'}</strong>
-              </div>
+              {isLand ? (
+                hasValue(property.propertyUse) && (
+                  <div className="sa-information-row">
+                    <span>Land use</span>
+                    <strong>{property.propertyUse}</strong>
+                  </div>
+                )
+              ) : (
+                hasValue(property.category) && (
+                  <div className="sa-information-row">
+                    <span>Category</span>
+                    <strong>{property.category}</strong>
+                  </div>
+                )
+              )}
 
-              <div className="sa-information-row">
-                <span>Title documentation</span>
-                <strong>
-                  {property.titleDocument || 'Contact for details'}
-                </strong>
-              </div>
+              {hasValue(property.titleDocument) && (
+                <div className="sa-information-row">
+                  <span>Title documentation</span>
+                  <strong>{property.titleDocument}</strong>
+                </div>
+              )}
             </div>
 
           </div>
@@ -489,7 +557,7 @@ function PropertyDetails() {
               <p className="sa-detail-eyebrow">INVESTMENT DETAILS</p>
 
               <span className="sa-enquiry-price-label">ASKING PRICE</span>
-              <h2>{property.price || 'Price on request'}</h2>
+              <h2>{hasValue(property.price) ? property.price : 'Price on request'}</h2>
 
               <div className="sa-enquiry-divider" />
 

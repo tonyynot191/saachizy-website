@@ -10,6 +10,7 @@ function fromDatabase(row) {
     title: row.title || '',
     location: row.location || '',
     category: row.category || 'Residential',
+    propertyUse: row.property_use || '',
     price: row.price || '',
     units: row.units || '',
     bedrooms: row.bedrooms || '',
@@ -27,6 +28,7 @@ function toDatabase(property) {
     title: property.title,
     location: property.location,
     category: property.category,
+    property_use: property.propertyUse || null,
     price: property.price,
     units: property.units,
     bedrooms: property.bedrooms,
@@ -39,7 +41,7 @@ function toDatabase(property) {
   };
 }
 
-// Fetch properties from Supabase
+// Fetch all properties
 export async function getProperties() {
   const { data, error } = await supabase
     .from(TABLE)
@@ -52,6 +54,72 @@ export async function getProperties() {
   }
 
   return data.map(fromDatabase);
+}
+
+// Fetch one page of publicly available properties
+export async function getPublicPropertiesPage({
+  page = 1,
+  pageSize = 12,
+  search = '',
+  category = 'All',
+} = {}) {
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePageSize = Math.min(
+    100,
+    Math.max(1, Number(pageSize) || 12)
+  );
+
+  const start = (safePage - 1) * safePageSize;
+  const end = start + safePageSize - 1;
+
+  let query = supabase
+    .from(TABLE)
+    .select('*', { count: 'exact' })
+    .eq('status', 'Available')
+    .order('created_at', { ascending: false });
+
+  if (category && category !== 'All') {
+    query = query.eq('category', category);
+  }
+
+  const searchTerm = String(search || '').trim();
+
+  if (searchTerm) {
+    // Escape characters that could interfere with PostgREST filter syntax.
+    const safeSearch = searchTerm
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    const pattern = `"%${safeSearch}%"`;
+
+    query = query.or(
+      [
+        `title.ilike.${pattern}`,
+        `location.ilike.${pattern}`,
+        `description.ilike.${pattern}`,
+        `category.ilike.${pattern}`,
+        `property_use.ilike.${pattern}`,
+        `title_document.ilike.${pattern}`,
+      ].join(',')
+    );
+  }
+
+  const { data, error, count } = await query.range(start, end);
+
+  if (error) {
+    console.error('Error loading property page:', error.message);
+    throw error;
+  }
+
+  const totalCount = count || 0;
+
+  return {
+    properties: (data || []).map(fromDatabase),
+    totalCount,
+    totalPages: Math.ceil(totalCount / safePageSize),
+    currentPage: safePage,
+    pageSize: safePageSize,
+  };
 }
 
 // Create a property
@@ -149,7 +217,6 @@ export async function uploadPropertyMedia(propertyId, file) {
   return mediaItem;
 }
 
-
 // Load properties and expose their loading status
 function usePropertiesData() {
   const [properties, setProperties] = useState([]);
@@ -194,7 +261,7 @@ export function useProperties() {
   return usePropertiesData().properties;
 }
 
-// New hook — provides properties, loading and error
+// Existing hook — provides properties, loading and error
 export function usePropertiesWithStatus() {
   return usePropertiesData();
 }

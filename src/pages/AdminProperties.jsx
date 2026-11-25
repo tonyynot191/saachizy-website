@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
+import BulkPropertyImport from '../components/BulkPropertyImport';
 
 import {
   useProperties,
@@ -18,6 +19,7 @@ const emptyForm = {
   title: '',
   location: '',
   category: 'Residential',
+  propertyUse: '',
   price: '',
   units: '',
   bedrooms: '',
@@ -71,9 +73,11 @@ function AdminProperties() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [formMode, setFormMode] = useState('House');
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
+  const [listingType, setListingType] = useState('All');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -86,23 +90,29 @@ function AdminProperties() {
   ).length;
 
   const filteredProperties = useMemo(() => {
-    return properties.filter(property => {
-      const matchesSearch = [
-        property.title,
-        property.location,
-        property.category,
-        property.price,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(search.toLowerCase());
+  return properties.filter(property => {
+    const matchesSearch = [
+      property.title,
+      property.location,
+      property.category,
+      property.propertyUse,
+      property.price,
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-      const matchesFilter =
-        filter === 'All' || property.status === filter;
+    const matchesFilter =
+      filter === 'All' || property.status === filter;
 
-      return matchesSearch && matchesFilter;
-    });
-  }, [properties, search, filter]);
+    const matchesListingType =
+      listingType === 'All' ||
+      (listingType === 'Land' && property.category === 'Land') ||
+      (listingType === 'Houses' && property.category !== 'Land');
+
+    return matchesSearch && matchesFilter && matchesListingType;
+  });
+}, [properties, search, filter, listingType]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -117,8 +127,14 @@ function AdminProperties() {
     setSelectedFiles(Array.from(event.target.files || []));
   }
 
-  function openAddForm() {
-    setForm(emptyForm);
+  function openAddForm(type) {
+    const selectedType = type === 'Land' ? 'Land' : 'House';
+
+    setForm({
+      ...emptyForm,
+      category: selectedType === 'Land' ? 'Land' : 'Residential',
+    });
+    setFormMode(selectedType);
     setEditingId(null);
     setSelectedFiles([]);
     setShowForm(true);
@@ -131,6 +147,7 @@ function AdminProperties() {
       title: property.title || '',
       location: property.location || '',
       category: property.category || 'Residential',
+      propertyUse: property.propertyUse || '',
       price: property.price || '',
       units: property.units || '',
       bedrooms: property.bedrooms || '',
@@ -140,6 +157,7 @@ function AdminProperties() {
       description: property.description || '',
     });
 
+    setFormMode(property.category === 'Land' ? 'Land' : 'House');
     setSelectedFiles([]);
     setEditingId(property.id);
     setShowForm(true);
@@ -164,11 +182,20 @@ function AdminProperties() {
     try {
       let savedProperty;
 
+      // Keep land and building records structurally separate.
+      const propertyPayload = {
+        ...form,
+        category: formMode === 'Land' ? 'Land' : form.category,
+        propertyUse: formMode === 'Land' ? form.propertyUse : '',
+        units: formMode === 'Land' ? '' : form.units,
+        bedrooms: formMode === 'Land' ? '' : form.bedrooms,
+      };
+
       if (editingId !== null) {
-        savedProperty = await updateProperty(editingId, form);
+        savedProperty = await updateProperty(editingId, propertyPayload);
       } else {
         savedProperty = await createProperty({
-          ...form,
+          ...propertyPayload,
           status: 'Available',
         });
       }
@@ -317,13 +344,31 @@ function AdminProperties() {
 
           </div>
 
-          <button
-            type="button"
-            className="sa-gold-button"
-            onClick={openAddForm}
+          <div
+            className="sa-add-property-actions"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px',
+              alignItems: 'center',
+            }}
           >
-            + Add New Property
-          </button>
+            <button
+              type="button"
+              className="sa-gold-button"
+              onClick={() => openAddForm('Land')}
+            >
+              + Add Land Property
+            </button>
+
+            <button
+              type="button"
+              className="sa-gold-button"
+              onClick={() => openAddForm('House')}
+            >
+              + Add House Property
+            </button>
+          </div>
 
         </section>
 
@@ -376,6 +421,9 @@ function AdminProperties() {
           </article>
 
         </section>
+        
+        {/* BULK PROPERTY IMPORT */}
+        <BulkPropertyImport properties={properties} />
 
         {/* PROPERTY FORM */}
         {showForm && (
@@ -391,11 +439,15 @@ function AdminProperties() {
 
                 <h2>
                   {editingId !== null
-                    ? 'Update Property'
-                    : 'Create New Listing'}
+                    ? `Update ${formMode === 'Land' ? 'Land' : 'House'} Listing`
+                    : `Create ${formMode === 'Land' ? 'Land' : 'House'} Listing`}
                 </h2>
 
-                <p>Enter accurate details for this property.</p>
+                <p>
+                  {formMode === 'Land'
+                    ? 'Enter the land details, intended use and legal title.'
+                    : 'Enter the building details, property category and features.'}
+                </p>
               </div>
 
               <button
@@ -420,7 +472,11 @@ function AdminProperties() {
                     name="title"
                     value={form.title}
                     onChange={handleChange}
-                    placeholder="e.g. Luxury 5 Bedroom Duplex"
+                    placeholder={
+                      formMode === 'Land'
+                        ? 'e.g. Katampe Main Residential Plot'
+                        : 'e.g. Luxury 5 Bedroom Duplex'
+                    }
                     required
                   />
                 </label>
@@ -437,19 +493,37 @@ function AdminProperties() {
                   />
                 </label>
 
-                <label>
-                  Property Category *
+                {formMode === 'Land' ? (
+                  <label>
+                    Land Use *
 
-                  <select
-                    name="category"
-                    value={form.category}
-                    onChange={handleChange}
-                  >
-                    <option value="Residential">Residential</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Land">Land</option>
-                  </select>
-                </label>
+                    <select
+                      name="propertyUse"
+                      value={form.propertyUse}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Select land use</option>
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Mixed Use">Mixed Use</option>
+                    </select>
+                  </label>
+                ) : (
+                  <label>
+                    Property Category *
+
+                    <select
+                      name="category"
+                      value={form.category}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                    </select>
+                  </label>
+                )}
 
                 <label>
                   Asking Price *
@@ -463,41 +537,46 @@ function AdminProperties() {
                   />
                 </label>
 
+                {formMode === 'House' && (
+                  <>
+                    <label>
+                      Number of Units
+
+                      <input
+                        name="units"
+                        value={form.units}
+                        onChange={handleChange}
+                        placeholder="e.g. 8 Units"
+                      />
+                    </label>
+
+                    <label>
+                      Bedrooms
+
+                      <input
+                        name="bedrooms"
+                        value={form.bedrooms}
+                        onChange={handleChange}
+                        placeholder="e.g. 5 Bedrooms"
+                      />
+                    </label>
+                  </>
+                )}
+
                 <label>
-                  Number of Units
-
-                  <input
-                    name="units"
-                    value={form.units}
-                    onChange={handleChange}
-                    placeholder="e.g. 8 Units"
-                  />
-                </label>
-
-                <label>
-                  Bedrooms
-
-                  <input
-                    name="bedrooms"
-                    value={form.bedrooms}
-                    onChange={handleChange}
-                    placeholder="e.g. 5 Bedrooms"
-                  />
-                </label>
-
-                <label>
-                  Land Size
+                  {formMode === 'Land' ? 'Plot Size *' : 'Land Size'}
 
                   <input
                     name="landSize"
                     value={form.landSize}
                     onChange={handleChange}
                     placeholder="e.g. 2,000 sqm"
+                    required={formMode === 'Land'}
                   />
                 </label>
 
                 <label>
-                  Title Document
+                  Legal Title
 
                   <input
                     name="titleDocument"
@@ -552,7 +631,11 @@ function AdminProperties() {
                     value={form.description}
                     onChange={handleChange}
                     rows="5"
-                    placeholder="Describe the property, its features, title and investment potential..."
+                    placeholder={
+                      formMode === 'Land'
+                        ? 'Describe the plot, location, access, title and development potential...'
+                        : 'Describe the property, its features, title and investment potential...'
+                    }
                   />
                 </label>
 
@@ -606,6 +689,32 @@ function AdminProperties() {
             </div>
 
           </div>
+          
+          <div className="sa-listing-type-tabs">
+  <button
+    type="button"
+    className={listingType === 'All' ? 'active' : ''}
+    onClick={() => setListingType('All')}
+  >
+    All Properties
+  </button>
+
+  <button
+    type="button"
+    className={listingType === 'Land' ? 'active' : ''}
+    onClick={() => setListingType('Land')}
+  >
+    Land Listings
+  </button>
+
+  <button
+    type="button"
+    className={listingType === 'Houses' ? 'active' : ''}
+    onClick={() => setListingType('Houses')}
+  >
+    Houses & Buildings
+  </button>
+</div>
 
           <div className="sa-portfolio-toolbar">
 
@@ -659,13 +768,30 @@ function AdminProperties() {
               </p>
 
               {properties.length === 0 && (
-                <button
-                  type="button"
-                  className="sa-gold-button"
-                  onClick={openAddForm}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    gap: '12px',
+                  }}
                 >
-                  + Add Your First Property
-                </button>
+                  <button
+                    type="button"
+                    className="sa-gold-button"
+                    onClick={() => openAddForm('Land')}
+                  >
+                    + Add First Land Listing
+                  </button>
+
+                  <button
+                    type="button"
+                    className="sa-gold-button"
+                    onClick={() => openAddForm('House')}
+                  >
+                    + Add First House Listing
+                  </button>
+                </div>
               )}
 
             </div>

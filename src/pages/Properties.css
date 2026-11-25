@@ -1054,3 +1054,119 @@
     margin-bottom: 25px;
   }
 }
+
+/* =========================================
+   SAACHIZY PROPERTY PAGINATION
+========================================= */
+
+.sa-pagination-size {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #777;
+}
+
+.sa-pagination-size select {
+  min-width: 65px;
+  padding: 10px 12px;
+  border: 1px solid rgba(185, 148, 84, 0.45);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sa-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 55px 0 15px;
+}
+
+.sa-pagination button {
+  min-width: 42px;
+  height: 42px;
+  border: 1px solid rgba(185, 148, 84, 0.35);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.sa-pagination button:hover:not(:disabled),
+.sa-pagination button.active {
+  background: #b99454;
+  border-color: #b99454;
+  color: #fff;
+}
+
+.sa-pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.sa-pagination-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: 10px !important;
+  letter-spacing: 1px;
+}
+
+.sa-pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sa-pagination-dots {
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 3px;
+}
+
+.sa-pagination-summary {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #999;
+  margin: 15px 0 35px;
+}
+
+@media (max-width: 600px) {
+  .sa-pagination {
+    gap: 6px;
+    margin-top: 35px;
+  }
+
+  .sa-pagination button {
+    min-width: 35px;
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .sa-pagination-arrow {
+    padding: 0 8px;
+    font-size: 9px !important;
+  }
+
+  .sa-pagination-numbers {
+    gap: 4px;
+  }
+
+  .sa-results-toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sa-pagination-size {
+    font-size: 10px;
+  }
+}

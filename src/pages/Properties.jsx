@@ -1,9 +1,9 @@
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import SEO from '../components/SEO';
-import { usePropertiesWithStatus } from '../data/propertyStore';
+import { getPublicPropertiesPage } from '../data/propertyStore';
 import Loader from '../components/Loader';
 import '../App.css';
 import './Properties.css';
@@ -13,43 +13,159 @@ const fallbackImage =
 
 function Properties() {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const {
-    properties: allProperties,
-    loading,
-    error,
-  } = usePropertiesWithStatus();
+  // DATABASE PAGINATION
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const availableProperties = allProperties.filter(
-    property => property.status === 'Available'
-  );
+  // PROPERTY DATA
+  const [properties, setProperties] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const filteredProperties = useMemo(() => {
-    return availableProperties.filter(property => {
-      const term = search.toLowerCase().trim();
+  // LOADING AND ERROR STATES
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-      const matchesSearch =
-        !term ||
-        [
-          property.title,
-          property.location,
-          property.description,
-          property.category,
-          property.titleDocument,
-        ].some(value => (value || '').toLowerCase().includes(term));
+  // DEBOUNCE SEARCH
+  // Prevents sending a database request for every keystroke.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
 
-      const matchesCategory =
-        category === 'All' || property.category === category;
+    return () => clearTimeout(timer);
+  }, [search]);
 
-      return matchesSearch && matchesCategory;
-    });
-  }, [availableProperties, search, category]);
+  // RESET TO FIRST PAGE WHEN FILTERS CHANGE
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, category, itemsPerPage]);
 
+  // LOAD ONLY THE REQUESTED PAGE FROM SUPABASE
+  useEffect(() => {
+    let active = true;
+
+    async function loadProperties() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await getPublicPropertiesPage({
+          page: currentPage,
+          pageSize: itemsPerPage,
+          search: debouncedSearch,
+          category,
+        });
+
+        if (!active) return;
+
+        setProperties(result.properties);
+        setTotalCount(result.totalCount);
+        setTotalPages(Math.max(1, result.totalPages));
+
+        // Handle a page that no longer exists
+        // after a property is deleted or its status changes.
+        if (
+          result.totalPages > 0 &&
+          currentPage > result.totalPages
+        ) {
+          setCurrentPage(result.totalPages);
+        }
+      } catch (err) {
+        if (!active) return;
+
+        console.error('Property loading failed:', err);
+
+        setProperties([]);
+        setTotalCount(0);
+        setTotalPages(1);
+        setError(
+          err.message || 'Unable to load properties. Please try again.'
+        );
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProperties();
+
+    return () => {
+      active = false;
+    };
+  }, [
+    currentPage,
+    itemsPerPage,
+    debouncedSearch,
+    category,
+    reloadKey,
+  ]);
+
+  // PAGINATION DISPLAY VALUES
+  const firstProperty =
+    totalCount === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
+
+  const lastProperty =
+    firstProperty === 0
+      ? 0
+      : firstProperty + properties.length - 1;
+
+  // CLEAR FILTERS
   const clearFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setCategory('All');
+    setCurrentPage(1);
+  };
+
+  // PAGE NAVIGATION
+  const goToPage = page => {
+    const nextPage = Math.max(1, Math.min(page, totalPages));
+
+    setCurrentPage(nextPage);
+
+    const collection = document.getElementById('collection');
+
+    if (collection) {
+      collection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  // PAGE NUMBER GENERATION
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    let startPage = Math.max(1, currentPage - 2);
+
+    let endPage = Math.min(
+      totalPages,
+      startPage + maxVisiblePages - 1
+    );
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(
+        1,
+        endPage - maxVisiblePages + 1
+      );
+    }
+
+    for (let page = startPage; page <= endPage; page++) {
+      pages.push(page);
+    }
+
+    return pages;
   };
 
   return (
@@ -121,7 +237,9 @@ function Properties() {
           type="button"
           className="sa-menu-toggle"
           onClick={() => setMenuOpen(previous => !previous)}
-          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-label={
+            menuOpen ? 'Close navigation menu' : 'Open navigation menu'
+          }
           aria-expanded={menuOpen}
         >
           <span>{menuOpen ? 'CLOSE' : 'MENU'}</span>
@@ -134,7 +252,7 @@ function Properties() {
 
       </nav>
 
-      {/* SAACHIZY — CINEMATIC PROPERTIES HERO */}
+      {/* SAACHIZY CINEMATIC PROPERTIES HERO */}
       <header className="hero sa-properties-page-hero">
 
         <div className="sa-hero-background"></div>
@@ -220,7 +338,7 @@ function Properties() {
 
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={() => setReloadKey(previous => previous + 1)}
             >
               TRY AGAIN
             </button>
@@ -230,6 +348,7 @@ function Properties() {
 
           <>
 
+            {/* COLLECTION HEADING */}
             <div className="sa-collection-heading">
 
               <div>
@@ -247,10 +366,11 @@ function Properties() {
 
               <div className="sa-listing-count">
                 <strong>
-                  {filteredProperties.length.toString().padStart(2, '0')}
+                  {totalCount.toString().padStart(2, '0')}
                 </strong>
+
                 <span>
-                  AVAILABLE
+                  MATCHING
                   <br />
                   PROPERTIES
                 </span>
@@ -301,9 +421,29 @@ function Properties() {
             <div className="sa-results-toolbar">
 
               <p>
-                Showing <strong>{filteredProperties.length}</strong> of{' '}
-                <strong>{availableProperties.length}</strong> available properties
+                Showing <strong>{firstProperty}–{lastProperty}</strong> of{' '}
+                <strong>{totalCount}</strong> matching properties
               </p>
+
+              <div className="sa-pagination-size">
+                <label htmlFor="sa-items-per-page">
+                  SHOW
+                </label>
+
+                <select
+                  id="sa-items-per-page"
+                  value={itemsPerPage}
+                  onChange={event =>
+                    setItemsPerPage(Number(event.target.value))
+                  }
+                >
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                  <option value={48}>48</option>
+                </select>
+
+                <span>PER PAGE</span>
+              </div>
 
               {(search || category !== 'All') && (
                 <button type="button" onClick={clearFilters}>
@@ -314,11 +454,11 @@ function Properties() {
             </div>
 
             {/* PROPERTY GRID */}
-            {filteredProperties.length > 0 ? (
+            {properties.length > 0 ? (
 
               <div className="sa-property-grid">
 
-                {filteredProperties.map(property => (
+                {properties.map(property => (
 
                   <article className="sa-property-card" key={property.id}>
 
@@ -362,29 +502,56 @@ function Properties() {
 
                       <div className="sa-card-specifications">
 
-                        <div>
-                          <span>UNITS</span>
-                          <strong>{property.units || '—'}</strong>
-                        </div>
+                        {property.category === 'Land' ? (
 
-                        <div>
-                          <span>BEDROOMS</span>
-                          <strong>{property.bedrooms || '—'}</strong>
-                        </div>
+                          <>
+                            <div>
+                              <span>LAND USE</span>
+                              <strong>{property.propertyUse || '—'}</strong>
+                            </div>
 
-                        <div>
-                          <span>LAND AREA</span>
-                          <strong>{property.landSize || '—'}</strong>
-                        </div>
+                            <div>
+                              <span>PLOT SIZE</span>
+                              <strong>{property.landSize || '—'}</strong>
+                            </div>
+
+                            <div>
+                              <span>TITLE</span>
+                              <strong>{property.titleDocument || '—'}</strong>
+                            </div>
+                          </>
+
+                        ) : (
+
+                          <>
+                            <div>
+                              <span>UNITS</span>
+                              <strong>{property.units || '—'}</strong>
+                            </div>
+
+                            <div>
+                              <span>BEDROOMS</span>
+                              <strong>{property.bedrooms || '—'}</strong>
+                            </div>
+
+                            <div>
+                              <span>LAND AREA</span>
+                              <strong>{property.landSize || '—'}</strong>
+                            </div>
+                          </>
+
+                        )}
 
                       </div>
 
-                      <div className="sa-card-title">
-                        <span>TITLE DOCUMENT</span>
-                        <strong>
-                          {property.titleDocument || 'Available on request'}
-                        </strong>
-                      </div>
+                      {property.category !== 'Land' && (
+                        <div className="sa-card-title">
+                          <span>TITLE DOCUMENT</span>
+                          <strong>
+                            {property.titleDocument || 'Available on request'}
+                          </strong>
+                        </div>
+                      )}
 
                       <div className="sa-card-footer">
 
@@ -420,8 +587,8 @@ function Properties() {
                 <h3>No Properties Found</h3>
 
                 <p>
-                  {availableProperties.length === 0
-                    ? 'There are currently no available properties. Please check again soon.'
+                  {totalCount === 0
+                    ? 'There are currently no available properties matching your selection. Please check again soon.'
                     : 'We could not find a property matching your search. Try another keyword or category.'}
                 </p>
 
@@ -432,6 +599,93 @@ function Properties() {
                 )}
               </div>
 
+            )}
+
+            {/* PAGINATION CONTROLS */}
+            {totalCount > 0 && totalPages > 1 && (
+
+              <div className="sa-pagination">
+
+                <button
+                  type="button"
+                  className="sa-pagination-arrow"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  aria-label="Previous page"
+                >
+                  ← <span>PREVIOUS</span>
+                </button>
+
+                <div className="sa-pagination-numbers">
+
+                  {currentPage > 3 && totalPages > 5 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => goToPage(1)}
+                      >
+                        1
+                      </button>
+
+                      {currentPage > 4 && (
+                        <span className="sa-pagination-dots">...</span>
+                      )}
+                    </>
+                  )}
+
+                  {getPageNumbers().map(page => (
+
+                    <button
+                      type="button"
+                      key={page}
+                      className={
+                        currentPage === page ? 'active' : ''
+                      }
+                      onClick={() => goToPage(page)}
+                      aria-current={
+                        currentPage === page ? 'page' : undefined
+                      }
+                    >
+                      {page}
+                    </button>
+
+                  ))}
+
+                  {currentPage < totalPages - 2 && totalPages > 5 && (
+                    <>
+                      {currentPage < totalPages - 3 && (
+                        <span className="sa-pagination-dots">...</span>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => goToPage(totalPages)}
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+
+                </div>
+
+                <button
+                  type="button"
+                  className="sa-pagination-arrow"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next page"
+                >
+                  <span>NEXT</span> →
+                </button>
+
+              </div>
+
+            )}
+
+            {totalCount > 0 && (
+              <p className="sa-pagination-summary">
+                PAGE {currentPage} OF {totalPages}
+              </p>
             )}
 
           </>

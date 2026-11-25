@@ -2130,3 +2130,47 @@
     border-radius: 7px;
   }
 }
+/* SAACHIZY LAND AND HOUSE LISTING TABS */
+
+.sa-listing-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.sa-listing-type-tabs button {
+  padding: 12px 22px;
+  border: 1px solid rgba(190, 160, 100, 0.35);
+  border-radius: 6px;
+  background: #fff;
+  color: #17243a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.sa-listing-type-tabs button:hover {
+  border-color: #b99a5b;
+  color: #a17e3d;
+}
+
+.sa-listing-type-tabs button.active {
+  background: #14243b;
+  border-color: #c5a568;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(20, 36, 59, 0.12);
+}
+
+@media (max-width: 600px) {
+  .sa-listing-type-tabs {
+    gap: 8px;
+  }
+
+  .sa-listing-type-tabs button {
+    flex: 1;
+    padding: 11px 12px;
+    font-size: 12px;
+  }
+}
